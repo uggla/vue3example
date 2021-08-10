@@ -37,31 +37,32 @@ import { defineComponent } from "vue";
 import seriesService from "@/services/series.service";
 import pokemonService from "@/services/pokemon.service";
 import PokemonData from "@/services/pokemon.service";
+import { ref, onMounted } from "vue";
 
 export default defineComponent({
   name: "HelloWorld",
   props: {
     msg: String,
   },
-  data() {
-    return {
-      series: [] as unknown,
-      pokemon: PokemonData,
-    };
-  },
-  mounted() {
+  setup() {
     const pokemon_name = "pikachu";
-    seriesService.getSeries().then((response) => {
-      let series = response.map((item) => item.show);
-      // .filter((item) => item.image !== null); --> alternative to filter null image
-      console.log(series);
-      this.series = series;
+    const series = ref([] as unknown);
+    const pokemon = ref(PokemonData);
+
+    onMounted(() => {
+      pokemonService.fetchPokemon(pokemon_name).then((p) => {
+        console.log(p);
+        pokemon.value = p;
+      });
+
+      seriesService.getSeries().then((response) => {
+        let s = response.map((item) => item.show);
+        console.log(s);
+        series.value = s;
+      });
     });
 
-    pokemonService.fetchPokemon(pokemon_name).then((pokemon) => {
-      console.log(pokemon);
-      this.pokemon = pokemon;
-    });
+    return { series, pokemon };
   },
 });
 </script>
